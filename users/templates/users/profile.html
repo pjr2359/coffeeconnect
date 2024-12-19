@@ -8,6 +8,8 @@
   {% load static %}
   <link href="{% static 'output.css' %}" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="https://bootswatch.com/5/morph/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 
 <body class="bg-gray-100 min-h-screen d-flex align-items-center justify-content-center">
@@ -71,6 +73,7 @@
           <h3 class="h5 mb-3">Log a New Activity</h3>
           <a href="{% url 'log_activity' %}" class="btn btn-success w-100 mb-4">Log Activity</a>
         </div>
+        <div id="map" class="h-[500px]"></div>
       </div>
     </div>
   </div>
@@ -78,6 +81,22 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{0}/{42.4408576}/{-76.4805967}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var activities = { activities_data, safe };
+    activities.forEach(function (activity) {
+      if (activity.latitude && activity.longitude) {
+        L.marker([activity.latitude, activity.longitude]).addTo(map)
+          .bindPopup(activity.strain_name + ' (' + activity.strain_type + ')');
+      }
+    });
+  </script>
 </body>
 
 </html>

@@ -7,8 +7,17 @@ module.exports = {
     './**/static/**/*.js',
   ],
   theme: {
-    extend: {},
+    extend: {
+      height: {
+        '500px': '500px',
+      },
+      colors: {
+        mapBackground: '#e5f3ff',
+      },
+    },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+  ],
 }
 
