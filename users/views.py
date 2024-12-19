@@ -21,28 +21,11 @@ def register(request):
         form = CustomUserCreationForm()
     return render(request, 'users/register.html', {'form': form})
 
-@login_required
-def update_status(request):
-    if request.method == 'POST':
-        highness_status = request.POST.get('highness_status')
-        request.user.highness_status = highness_status
-        request.user.save()
-        return redirect('profile')
-    return render(request, 'users/update_status.html')
 
 @login_required
 def profile(request):
     if request.method == 'POST':
-        # Update highness status
-        print("The request post is: " + request.POST )  # Debugging 
-        highness_status = request.POST.get('highness_status')
-        if highness_status is not None:
-            print("The highness status is: " + highness_status)  # Debugging
-        else:
-            print("The highness status is None")
-        if highness_status is not None:
-            request.user.highness_status = highness_status
-            request.user.save()
+        
         
         # Log activity
         activity_form = ActivityForm(request.POST)
