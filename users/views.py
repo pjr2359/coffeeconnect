@@ -171,8 +171,8 @@ def friend_activities_api(request):
     
     data = [{
         'user': activity.user.username,
-        'strain_name': activity.strain_name,
-        'strain_type': activity.strain_type,
+        'blend_name': activity.blend_name,
+        'blend_type': activity.blend_type,
         'rating': activity.rating,
         'location': activity.location,
         'latitude': float(activity.latitude),

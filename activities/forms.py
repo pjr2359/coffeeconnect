@@ -7,4 +7,4 @@ class ActivityForm(forms.ModelForm):
     
     class Meta:
         model = Activity
-        fields = ['strain_name', 'strain_type', 'rating', 'location', 'notes', 'latitude', 'longitude']
+        fields = ['blend_name', 'blend_type', 'rating', 'location', 'notes', 'latitude', 'longitude']

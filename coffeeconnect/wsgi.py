@@ -1,5 +1,5 @@
 """
-WSGI config for weedfeed project.
+WSGI config for coffeefeed project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
