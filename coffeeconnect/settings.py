@@ -83,8 +83,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'coffeeconnect'),  
-        'USER': os.getenv('DB_USER', 'myadmin@coffeeconnect'),  # Changed user
-        'HOST': os.getenv('DB_HOST', 'coffeeconnect.postgres.database.azure.com'),  # Changed host
+        'USER': os.getenv('DB_USER', 'myadmin@coffeeconnect-db'),  # Changed user
+        'HOST': os.getenv('DB_HOST', 'coffeeconnect-db.postgres.database.azure.com'),  # Changed host
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'PORT': os.getenv('DB_PORT', '5432'),
         'OPTIONS': {
