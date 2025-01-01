@@ -1,5 +1,5 @@
 """
-ASGI config for weedfeed project.
+ASGI config for coffeeconnect project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
