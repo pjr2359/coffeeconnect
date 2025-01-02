@@ -3,31 +3,15 @@ from users.models import CustomUser
 
 class Activity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    blend_name = models.CharField(max_length=100, blank=True, null=True)
-    blend_type = models.CharField(max_length=50, choices=[('indica', 'Indica'), ('sativa', 'Sativa'), ('hybrid', 'Hybrid')])
+    blend_name = models.CharField(max_length=100, blank=True, null=True)  
+    blend_type = models.CharField(max_length=50, choices=[  \
+        ('arabica', 'Arabica'),
+        ('robusta', 'Robusta'), 
+        ('blend', 'Blend')
+    ])
     rating = models.IntegerField()
     location = models.CharField(max_length=100, blank=True, null=True)
-    latitude = models.FloatField(null=True, blank=True)  # Verify this exists
-    longitude = models.FloatField(null=True, blank=True) # Verify this exists
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     notes = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-
-
-class Migration(migrations.Migration):
-
-    dependencies = [
-        ('activities', '0002_activity_user'),
-    ]
-
-    operations = [
-        migrations.AddField(
-            model_name='activity',
-            name='latitude',
-            field=models.FloatField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='activity',
-            name='longitude',
-            field=models.FloatField(blank=True, null=True),
-        ),
-    ]

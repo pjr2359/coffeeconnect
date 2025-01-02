@@ -1,40 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Activity Feed</title>
-  {% load static %}
-  <link href="{% static 'output.css' %}" rel="stylesheet">
-</head>
-
-<body class="bg-gray-100 min-h-screen">
-  <div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-bold mb-6">Activity Feed</h2>
-      <div class="space-y-4">
-        {% for activity in activities %}
-        <div class="border-b pb-4 last:border-b-0">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-semibold">{{ activity.user.username }}'s Activity</h3>
-              <p class="text-sm text-gray-600">Strain: {{ activity.blend_name }} ({{ activity.blend_type }})</p>
-              <p class="text-sm text-gray-600">Rating: {{ activity.rating }}/10</p>
-              <p class="text-sm text-gray-600">Location: {{ activity.location }}</p>
-              {% if activity.notes %}
-              <p class="text-sm text-gray-700 mt-2">{{ activity.notes }}</p>
-              {% endif %}
-            </div>
-            <span class="text-sm text-gray-500">
-              {{ activity.timestamp|date:"M d, Y" }}
-            </span>
-          </div>
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Coffee Activity Feed</h2>
+  <div class="row">
+    <div class="col-md-8">
+      {% for activity in activities %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ activity.blend_name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ activity.blend_type }}</h6>
+          <p class="card-text">
+            Rating: {{ activity.rating }}/5
+            <br>
+            Location: {{ activity.location }}
+            <br>
+            Notes: {{ activity.notes }}
+          </p>
+          <small class="text-muted">{{ activity.timestamp|date:"F j, Y, g:i a" }}</small>
         </div>
-        {% endfor %}
       </div>
+      {% endfor %}
     </div>
   </div>
-</body>
-
-</html>
+</div>
+{% endblock %}
