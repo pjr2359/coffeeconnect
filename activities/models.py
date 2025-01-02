@@ -1,12 +1,12 @@
-from django.db import migrations, models
+from django.db import models
 from users.models import CustomUser
 
 class Activity(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    blend_name = models.CharField(max_length=100, blank=True, null=True)  
-    blend_type = models.CharField(max_length=50, choices=[  \
+    blend_name = models.CharField(max_length=100, blank=True, null=True)
+    blend_type = models.CharField(max_length=50, choices=[
         ('arabica', 'Arabica'),
-        ('robusta', 'Robusta'), 
+        ('robusta', 'Robusta'),
         ('blend', 'Blend')
     ])
     rating = models.IntegerField()
