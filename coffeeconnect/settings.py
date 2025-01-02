@@ -146,4 +146,8 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 LOGIN_REDIRECT_URL = '/profile/'
