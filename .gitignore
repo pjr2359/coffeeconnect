@@ -1,63 +1,155 @@
-# Virtual environment
+# Python virtual environments
 venv/
 .venv/
+env/
+ENV/
+virtualenv/
+pythonenv/
 
-# Tailwind CSS build output
-dist/
-build/
-
-# Log files
-*.log
-
-# Node modules
-node_modules/
-
-
-# Python cache files
+# Python compiled files
 __pycache__/
-users/__pycache__/
-activities/__pycache__/
-activities/migrations/__pycache__/
-users/migrations/__pycache__/
-weedfeed/__pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+sdist/
+var/
+wheels/
+*.manifest
+*.spec
+.installed.cfg
 
 # Django specific
 *.log
 *.pot
 *.pyc
-*.pyo
-*.pyd
-*.sqlite3
 db.sqlite3
-
-# Media and static files
+db.sqlite3-journal
+local_settings.py
 media/
 staticfiles/
 
-# Environment variables
-.env
+# Application specific caches
+users/__pycache__/
+activities/__pycache__/
+activities/migrations/__pycache__/
+users/migrations/__pycache__/
+coffeeconnect/__pycache__/
 
-# VS Code settings
-.vscode/
+# JavaScript / Frontend
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+.npm
+
+# Tailwind CSS build output
+dist/
+build/
+output.css
 
 # Coverage reports
 htmlcov/
-.coverage
 .tox/
 .nox/
+.coverage
+.coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+cover/
 
-# MyPy
+# Type checking
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre
 .pyre/
+.pytype/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+# IDE specific files
+## Visual Studio Code
+.vscode/
+*.code-workspace
+.history
+
+## PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iws
+out/
+
+## Jupyter Notebook
+.ipynb_checkpoints
+
+# OS specific files
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+## Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Deployment
+.vercel
+.netlify
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Databases
+*.sqlite3-journal
+*.db
+*.sql
+*.dump
+
+# Local development configuration
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
