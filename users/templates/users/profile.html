@@ -4,91 +4,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile</title>
+  <title>Coffee Dashboard</title>
   {% load static %}
   <link href="{% static 'output.css' %}" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="https://bootswatch.com/5/morph/bootstrap.min.css">
+  <!-- Removed Bootswatch link, relying on Tailwind -->
+  {% load crispy_forms_tags %}
 </head>
 
-<body class="bg-gray-100 min-h-screen d-flex align-items-center justify-content-center">
-  <div class="container">
-    <div class="row">
-      <!-- Sidebar for Friends, Friend Requests, and Add Friend -->
-      <div class="col-md-4">
-        <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-          <h3 class="h5 mb-3">Your Friends</h3>
-          <ul class="list-group mb-4">
-            {% for friend in friends %}
-            <li class="list-group-item">
-              <a href="{% url 'view_profile' friend.username %}" class="text-primary">{{ friend.username }}</a>
-            </li>
-            {% empty %}
-            <li class="list-group-item text-muted">You have no friends yet.</li>
-            {% endfor %}
-          </ul>
-
-          <h3 class="h5 mb-3">Friend Requests</h3>
-          <ul class="list-group mb-4">
-            {% for request in received_requests %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>{{ request.from_user.username }}</span>
-              <a href="{% url 'accept_friend_request' request.id %}" class="btn btn-success btn-sm">Accept</a>
-            </li>
-            {% empty %}
-            <li class="list-group-item text-muted">No friend requests.</li>
-            {% endfor %}
-          </ul>
-
-          <h3 class="h5 mb-3">Add a Friend</h3>
-          <form method="post" class="mb-4">
-            {% csrf_token %}
-            <div class="form-group">
-              <input type="text" id="friend_username" name="username" placeholder="Enter username" class="form-control">
+<body class="bg-cream min-h-screen py-5 font-sans">
+  <div class="container mx-auto px-4">
+    <div class="max-w-2xl mx-auto">
+      <!-- Display Messages -->
+      {% if messages %}
+        <div class="mb-4">
+          {% for message in messages %}
+            <div class="p-4 rounded {% if message.tags == 'success' %} bg-accent-green/80 text-white {% elif message.tags == 'error' %} bg-red-500/80 text-white {% else %} bg-blue-500/80 text-white {% endif %}" role="alert">
+              {{ message }}
             </div>
-            <button type="button" onclick="sendFriendRequest()" class="btn btn-primary w-100">Send Friend
-              Request</button>
-          </form>
+          {% endfor %}
         </div>
+      {% endif %}
+
+      <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg mb-6 border border-latte/30">
+        <div class="flex justify-between items-center mb-4">
+           <h2 class="text-2xl md:text-3xl font-semibold text-coffee-bean">Log New Coffee</h2>
+           {# Updated logo path and size #}
+           <img src="{% static 'assets/images/small_logo.png' %}" alt="CoffeeConnect Logo" class="h-16"> {# Changed h-10 to h-16 #}
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="space-y-4">
+             {# Restored |crispy filter #}
+             {{ coffee_log_form|crispy }}
+             {# Removed JS test script #}
+          </div>
+          <button type="submit" class="w-full mt-6 py-2 px-4 bg-espresso text-white rounded-md hover:bg-coffee-bean focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-espresso transition duration-150 ease-in-out font-medium">
+            Log Coffee Entry
+          </button>
+        </form>
       </div>
 
-      <!-- Main content for Logged Activities -->
-      <div class="col-md-8">
-        <div class="bg-white p-4 rounded-lg shadow-lg mb-4">
-          <h3 class="h5 mb-3">Logged Activities</h3>
-          <ul class="list-group mb-4" style="max-height: 400px; overflow-y: auto;">
-            {% for activity in activities %}
-            <li class="list-group-item">
-              <strong>{{ activity.blend_name }} ({{ activity.blend_type }})</strong>
-              <ul class="ml-3">
-                <li>Rating: {{ activity.rating }}</li>
-                <li>Location: {{ activity.location }}</li>
-                <li>Notes: {{ activity.notes }}</li>
-                <li>Timestamp: {{ activity.timestamp }}</li>
-              </ul>
-            </li>
-            {% endfor %}
-          </ul>
+      <!-- Removed Coffee Log History Section -->
 
-          <h3 class="h5 mb-3">Log a New Activity</h3>
-          <a href="{% url 'log_activity' %}" class="btn btn-success w-100 mb-4">Log Activity</a>
-          <!-- Add this button in your profile template -->
-          <a href="{% url 'activity_map' %}" class="btn btn-primary mb-4">View Activity Map</a>
-        </div>
+      <div class="text-center mt-6 space-x-4">
+        <a href="{% url 'coffee_history' %}" class="inline-block px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-latte hover:bg-espresso transition duration-150 ease-in-out">View History</a>
+        <a href="{% url 'manage_grinders' %}" class="inline-block px-6 py-2 border border-latte text-latte hover:text-white hover:bg-latte rounded-md transition duration-150 ease-in-out">Manage Grinders</a>
+        <a href="{% url 'logout' %}" class="inline-block px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-coffee-bean bg-paper-cup hover:bg-gray-50 transition duration-150 ease-in-out">Logout</a>
       </div>
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script>
-    function sendFriendRequest() {
-      const username = document.getElementById('friend_username').value;
-      if (username) {
-        window.location.href = `/send_friend_request/${username}/`;
-      }
-    }
-  </script>
+  <!-- Removed Bootstrap JS, not needed with Tailwind unless using specific BS components -->
 </body>
 
 </html>

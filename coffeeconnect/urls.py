@@ -24,12 +24,15 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
-    path('profile/', views.profile, name='profile'),
-    path('view_profile/<str:username>/', views.view_profile, name='view_profile'),
-    path('update_status/', views.update_status, name='update_status'),
-    path('log_activity/', views.log_activity, name='log_activity'),
-    path('send_friend_request/<str:username>/', views.send_friend_request, name='send_friend_request'),
-    path('accept_friend_request/<int:request_id>/', views.accept_friend_request, name='accept_friend_request'),
-    path('activity_map/', views.activity_map, name='activity_map'),
-    path('api/friend-activities/', views.friend_activities_api, name='friend_activities_api'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('log_coffee/', views.log_coffee, name='log_coffee'),
+    path('history/', views.coffee_history, name='coffee_history'),
+    
+    # Grinder management urls
+    path('grinders/', views.manage_grinders, name='manage_grinders'),
+    path('grinders/<int:pk>/edit/', views.edit_grinder, name='edit_grinder'),
+    path('grinders/<int:pk>/delete/', views.delete_grinder, name='delete_grinder'),
+    
+    # Analytics API endpoint
+    path('api/analytics/', views.get_analytics_data, name='get_analytics_data'),
 ]

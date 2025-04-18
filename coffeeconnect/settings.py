@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'activities',
+    'crispy_forms', # Added crispy_forms
+    'crispy_tailwind', # Changed from crispy_bootstrap5
 ]
 
 MIDDLEWARE = [
@@ -83,17 +85,11 @@ WSGI_APPLICATION = 'coffeeconnect.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'coffeeconnect'),  
-        'USER': os.getenv('DB_USER', 'myadmin@coffeeconnect-db'),  
-        'HOST': os.getenv('DB_HOST', 'coffeeconnect-db.postgres.database.azure.com'),  
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3', # Use a local SQLite file
     }
 }
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -150,4 +146,9 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-LOGIN_REDIRECT_URL = '/profile/'
+# Update crispy forms settings for Tailwind
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = 'tailwind'
+
+# Changed from /profile/ to /dashboard/
+LOGIN_REDIRECT_URL = '/dashboard/'

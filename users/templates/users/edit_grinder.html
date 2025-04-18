@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Grinder</title>
+    {% load static %}
+    <link href="{% static 'output.css' %}" rel="stylesheet">
+    {% load crispy_forms_tags %}
+</head>
+<body class="bg-cream min-h-screen py-8 font-sans">
+    <div class="container mx-auto px-4">
+        <div class="max-w-lg mx-auto">
+            <h1 class="text-3xl font-bold text-coffee-bean mb-8">Edit Grinder</h1>
+            
+            <!-- Display Messages -->
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded {% if message.tags == 'success' %} bg-accent-green/80 text-white {% elif message.tags == 'error' %} bg-red-500/80 text-white {% else %} bg-blue-500/80 text-white {% endif %}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Edit Grinder Form -->
+            <div class="bg-white p-6 rounded-lg shadow-md border border-latte/30 mb-8">
+                <h2 class="text-xl font-bold text-espresso mb-4">{{ grinder.grinder_name }}</h2>
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="flex space-x-3 mt-6">
+                        <button type="submit" class="flex-1 py-2 bg-espresso text-white rounded-md hover:bg-coffee-bean transition duration-150 ease-in-out font-medium">Save Changes</button>
+                        <a href="{% url 'manage_grinders' %}" class="flex-1 py-2 text-center border border-gray-300 text-coffee-bean bg-white hover:bg-gray-50 transition duration-150 ease-in-out rounded-md">Cancel</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Navigation links -->
+            <div class="text-center mt-6">
+                <a href="{% url 'manage_grinders' %}" class="text-latte hover:text-espresso font-medium">Back to Grinders</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

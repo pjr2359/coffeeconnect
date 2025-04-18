@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Log History & Analytics</title>
+    {% load static %}
+    <link href="{% static 'output.css' %}" rel="stylesheet">
+    {% load crispy_forms_tags %}
+    <!-- Add Chart.js for analytics visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- Add date range picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+<body class="bg-cream min-h-screen py-8 font-sans">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-coffee-bean mb-8 text-center">Coffee Analytics Dashboard</h1>
+        
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Left column: Coffee History -->
+            <div class="w-full md:w-1/2 space-y-6">
+                <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
+                    <h2 class="text-2xl font-bold text-espresso mb-4">Coffee History</h2>
+                    
+                    <!-- Advanced Search Form -->
+                    <form method="get" action="{% url 'coffee_history' %}" class="mb-6 space-y-3">
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                name="q" 
+                                value="{{ search_query|default:'' }}" 
+                                placeholder="Search coffee name or notes..." 
+                                class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-0 focus:border-latte text-sm"
+                            >
+                            <button type="submit" class="px-4 py-2 bg-latte text-white rounded-r-md hover:bg-espresso transition duration-150 ease-in-out font-medium text-sm">
+                                Search
+                            </button>
+                        </div>
+                        
+                        <!-- Advanced filters - collapsible -->
+                        <details class="bg-gray-50 p-3 rounded-md">
+                            <summary class="cursor-pointer font-medium text-latte">Advanced Filters</summary>
+                            <div class="pt-3 space-y-3">
+                                <div>
+                                    <label for="brew_method" class="block text-sm font-medium text-gray-700">Brewing Method</label>
+                                    <select name="brew_method" id="brew_method" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-latte focus:border-latte rounded-md text-sm">
+                                        <option value="">Any method</option>
+                                        {% for value, display in brew_methods %}
+                                            <option value="{{ value }}" {% if brew_method_filter == value %}selected{% endif %}>{{ display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-3">
+                                    <div class="w-full sm:w-[calc(50%-0.375rem)]">
+                                        <label for="date_from" class="block text-sm font-medium text-gray-700">From Date</label>
+                                        <input type="text" id="date_from" name="date_from" value="{{ date_from }}" 
+                                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm date-picker">
+                                    </div>
+                                    <div class="w-full sm:w-[calc(50%-0.375rem)]">
+                                        <label for="date_to" class="block text-sm font-medium text-gray-700">To Date</label>
+                                        <input type="text" id="date_to" name="date_to" value="{{ date_to }}" 
+                                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm date-picker">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="rating_min" class="block text-sm font-medium text-gray-700">Minimum Rating</label>
+                                    <select name="rating_min" id="rating_min" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-latte focus:border-latte rounded-md text-sm">
+                                        <option value="">Any rating</option>
+                                        {% for i in "12345" %}
+                                            <option value="{{ i }}" {% if rating_min == i %}selected{% endif %}>{{ i }}+ stars</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <button type="submit" class="w-full py-2 px-4 bg-espresso text-white rounded-md hover:bg-coffee-bean transition duration-150 ease-in-out font-medium text-sm">
+                                    Apply Filters
+                                </button>
+                                <a href="{% url 'coffee_history' %}" class="block text-center w-full py-2 border border-gray-300 text-coffee-bean rounded-md hover:bg-gray-50 transition duration-150 ease-in-out text-sm">
+                                    Clear All Filters
+                                </a>
+                            </div>
+                        </details>
+                    </form>
+                    
+                    <!-- Coffee Logs List -->
+                    {% if coffee_logs %}
+                        <div class="space-y-4 max-h-[700px] overflow-y-auto pr-1">
+                            {% for log in coffee_logs %}
+                                <div class="border border-gray-200 rounded-md p-4 hover:shadow-sm transition-shadow">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-espresso">{{ log.coffee_name }}</h3>
+                                            <span class="text-sm text-latte">({{ log.get_brew_method_display }})</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-gray-500 text-xs">{{ log.timestamp|date:"M d, Y" }}</div>
+                                            <div class="flex items-center">
+                                                <span class="font-semibold text-sm mr-1">{{ log.rating }}</span>
+                                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2">
+                                        {% if log.bean_grams %}
+                                            <div><span class="font-medium">Beans:</span> {{ log.bean_grams }}g</div>
+                                        {% endif %}
+                                        {% if log.water_amount_ml %}
+                                            <div><span class="font-medium">Water:</span> {{ log.water_amount_ml }}ml</div>
+                                        {% endif %}
+                                        {% if log.steep_time %}
+                                            <div><span class="font-medium">Time:</span> {{ log.steep_time }}</div>
+                                        {% endif %}
+                                        {% if log.grind_size %}
+                                            <div><span class="font-medium">Grind Size:</span> {{ log.grind_size }}</div>
+                                        {% endif %}
+                                        {% if log.brew_ratio %}
+                                            <div><span class="font-medium">Ratio:</span> 1:{{ log.brew_ratio }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if log.notes %}
+                                        <div class="text-xs mt-2">
+                                            <span class="font-medium">Notes:</span>
+                                            <p class="text-gray-600 italic mt-1 pl-2 border-l-2 border-latte/30">{{ log.notes|linebreaksbr }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="bg-white p-6 rounded-lg text-center">
+                            <p class="text-gray-500">No coffee logs found matching your criteria.</p>
+                            {% if search_query or brew_method_filter or date_from or date_to or rating_min %}
+                                <a href="{% url 'coffee_history' %}" class="mt-2 inline-block text-latte hover:text-espresso transition duration-150 ease-in-out">Clear filters</a>
+                            {% else %}
+                                <a href="{% url 'dashboard' %}" class="mt-4 inline-block px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-espresso hover:bg-coffee-bean transition duration-150 ease-in-out">Log your first coffee!</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right column: Analytics -->
+            <div class="w-full md:w-1/2 space-y-6">
+                <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100">
+                    <h2 class="text-2xl font-bold text-espresso mb-4">Coffee Analytics</h2>
+                    
+                    {% if analytics.total_logs > 0 %}
+                        <!-- Summary Stats -->
+                        <div class="grid grid-cols-3 gap-3 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-md text-center">
+                                <div class="text-3xl font-bold text-espresso">{{ analytics.total_logs }}</div>
+                                <div class="text-xs text-gray-500">Total Logs</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-md text-center">
+                                <div class="text-3xl font-bold text-espresso">{{ analytics.avg_rating|floatformat:1 }}</div>
+                                <div class="text-xs text-gray-500">Avg Rating</div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-md text-center">
+                                <div class="text-3xl font-bold text-espresso">{{ analytics.brew_methods_count.0.count|default:"0" }}</div>
+                                <div class="text-xs text-gray-500">Top Method</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Selection Tabs -->
+                        <div class="border-b border-gray-200 mb-4">
+                            <ul class="flex flex-wrap -mb-px" role="tablist">
+                                <li class="mr-6">
+                                    <button class="inline-block p-2 text-latte border-b-2 border-transparent hover:text-espresso hover:border-latte chart-tab active" data-chart="brew_methods">
+                                        Brew Methods
+                                    </button>
+                                </li>
+                                <li class="mr-6">
+                                    <button class="inline-block p-2 text-latte border-b-2 border-transparent hover:text-espresso hover:border-latte chart-tab" data-chart="ratings">
+                                        Ratings
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="inline-block p-2 text-latte border-b-2 border-transparent hover:text-espresso hover:border-latte chart-tab" data-chart="grind_analysis">
+                                        Grind Analysis
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Chart Container -->
+                        <div class="h-64 mb-6">
+                            <canvas id="analysisChart"></canvas>
+                        </div>
+                        
+                        <!-- Insights -->
+                        <div id="chartInsights" class="p-4 bg-gray-50 rounded-md text-sm text-gray-600 mt-4 border border-gray-100">
+                            <!-- Will be filled with JS -->
+                        </div>
+                        
+                        <!-- Top Coffee Insights -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold text-espresso mb-2">Your Top Coffees</h3>
+                            {% if analytics.top_coffees %}
+                                <div class="space-y-2">
+                                    {% for coffee in analytics.top_coffees %}
+                                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                                            <div>{{ coffee.coffee_name }}</div>
+                                            <div class="flex items-center">
+                                                <span class="mr-1 font-medium">{{ coffee.avg_rating|floatformat:1 }}</span>
+                                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                                <span class="ml-2 text-xs text-gray-500">({{ coffee.count }} logs)</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-sm text-gray-500">Log more coffees to see your top picks.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Best Grind Size Recommendations -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold text-espresso mb-2">Best Grind Size by Method</h3>
+                            {% if analytics.best_grinds %}
+                                <div class="space-y-2">
+                                    {% for grind in analytics.best_grinds %}
+                                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                                            {% for value, display in brew_methods %}
+                                                {% if value == grind.brew_method %}
+                                                    <div>{{ display }}</div>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <div class="font-medium">
+                                                {{ grind.best_grind|floatformat:1 }}
+                                                <span class="ml-1 text-xs text-gray-500">(avg for {{ grind.avg_rating|floatformat:1 }}★ coffees)</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-sm text-gray-500">Log more coffees with grind sizes to see recommendations.</p>
+                                <p class="mt-2 text-sm">
+                                    <a href="{% url 'manage_grinders' %}" class="text-latte hover:text-espresso">Setup your grinder settings</a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-10">
+                            <p class="text-gray-500 mb-4">No coffee logs yet. Add some to see analytics.</p>
+                            <a href="{% url 'dashboard' %}" class="inline-block px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-espresso hover:bg-coffee-bean transition duration-150 ease-in-out">Log Coffee</a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Manage Grinders Link -->
+                <div class="bg-white p-4 rounded-lg shadow-md border border-gray-100 text-center">
+                    <p class="text-gray-600 mb-3">Set up your grinders to track consistency in your coffee brewing.</p>
+                    <a href="{% url 'manage_grinders' %}" class="inline-block px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-latte hover:bg-espresso transition duration-150 ease-in-out">Manage My Grinders</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation links -->
+        <div class="text-center mt-8">
+            <a href="{% url 'dashboard' %}" class="inline-block px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-coffee-bean bg-white hover:bg-gray-50 transition duration-150 ease-in-out shadow-sm">Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize date pickers
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr(".date-picker", {
+                dateFormat: "Y-m-d",
+                allowInput: true
+            });
+            
+            // Initialize analytics charts if data exists
+            {% if analytics.total_logs > 0 %}
+                initCharts();
+            {% endif %}
+        });
+        
+        function initCharts() {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            let currentChart;
+            
+            // Set active tab styling
+            const tabs = document.querySelectorAll('.chart-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active', 'text-espresso', 'border-latte'));
+                    this.classList.add('active', 'text-espresso', 'border-latte');
+                    renderChart(this.getAttribute('data-chart'));
+                });
+            });
+            
+            // Initial chart
+            renderChart('brew_methods');
+            
+            function renderChart(chartType) {
+                // Destroy previous chart if exists
+                if (currentChart) {
+                    currentChart.destroy();
+                }
+                
+                let chartData, options, insights;
+                
+                if (chartType === 'brew_methods') {
+                    // Brew methods distribution
+                    const methods = [];
+                    const counts = [];
+                    const colors = [
+                        '#A0785A', '#3D2B1F', '#4B3832', '#8B5A2B', '#CD853F', 
+                        '#D2B48C', '#DEB887', '#F5DEB3', '#4CAF50', '#8E735E'
+                    ];
+                    
+                    {% for method in analytics.brew_methods_count %}
+                        {% for value, display in brew_methods %}
+                            {% if value == method.brew_method %}
+                                methods.push("{{ display }}");
+                            {% endif %}
+                        {% endfor %}
+                        counts.push({{ method.count }});
+                    {% endfor %}
+                    
+                    chartData = {
+                        labels: methods,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: colors.slice(0, methods.length),
+                            hoverOffset: 10
+                        }]
+                    };
+                    
+                    options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Your Brewing Methods',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    };
+                    
+                    currentChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: chartData,
+                        options: options
+                    });
+                    
+                    // Set insights
+                    const topMethod = methods[0] || 'None';
+                    const topCount = counts[0] || 0;
+                    const totalLogs = {{ analytics.total_logs }};
+                    const percentage = Math.round((topCount / totalLogs) * 100);
+                    
+                    insights = `<p>You brew coffee most frequently using <strong>${topMethod}</strong> (${percentage}% of logs).</p>`;
+                    if (methods.length > 1) {
+                        insights += `<p>Try experimenting with different methods to expand your coffee experience.</p>`;
+                    }
+                    
+                } else if (chartType === 'ratings') {
+                    // Ratings by brew method
+                    const methods = [];
+                    const ratings = [];
+                    const counts = [];
+                    
+                    {% for item in analytics.rating_by_method %}
+                        {% for value, display in brew_methods %}
+                            {% if value == item.brew_method %}
+                                methods.push("{{ display }}");
+                            {% endif %}
+                        {% endfor %}
+                        ratings.push({{ item.avg_rating|floatformat:2 }});
+                        counts.push({{ item.count }});
+                    {% endfor %}
+                    
+                    chartData = {
+                        labels: methods,
+                        datasets: [{
+                            label: 'Average Rating',
+                            data: ratings,
+                            backgroundColor: '#A0785A',
+                            borderColor: '#4B3832',
+                            borderWidth: 1
+                        }]
+                    };
+                    
+                    options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5,
+                                title: {
+                                    display: true,
+                                    text: 'Rating (out of 5)',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Average Ratings by Brewing Method',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const index = context.dataIndex;
+                                        return `Rating: ${ratings[index].toFixed(1)} (${counts[index]} logs)`;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    currentChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: chartData,
+                        options: options
+                    });
+                    
+                    // Set insights
+                    let highestMethodIndex = -1;
+                    let highestRating = 0;
+                    
+                    for (let i = 0; i < ratings.length; i++) {
+                        if (ratings[i] > highestRating && counts[i] >= 2) {
+                            highestRating = ratings[i];
+                            highestMethodIndex = i;
+                        }
+                    }
+                    
+                    if (highestMethodIndex !== -1) {
+                        insights = `<p>Your highest rated brewing method is <strong>${methods[highestMethodIndex]}</strong> with an average rating of ${highestRating.toFixed(1)}.</p>`;
+                    } else {
+                        insights = `<p>Log more coffee entries to see insights about your ratings.</p>`;
+                    }
+                    
+                } else if (chartType === 'grind_analysis') {
+                    // Fetch grind size vs rating data from API
+                    fetch('{% url "get_analytics_data" %}?chart_type=grind_vs_rating')
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.data.length === 0) {
+                                document.getElementById('chartInsights').innerHTML = 
+                                    '<p>No grind size data available. Add grind size information to your coffee logs.</p>' + 
+                                    '<p class="mt-2"><a href="{% url "manage_grinders" %}" class="text-latte hover:text-espresso">Setup your grinder settings</a></p>';
+                                return;
+                            }
+                            
+                            // Process the data by brewing method
+                            const brewMethods = [...new Set(result.data.map(item => item.brew_method))];
+                            const datasets = [];
+                            const colors = ['#A0785A', '#4B3832', '#8B5A2B', '#CD853F', '#D2B48C', '#4CAF50'];
+                            
+                            brewMethods.forEach((method, index) => {
+                                const methodData = result.data.filter(item => item.brew_method === method);
+                                
+                                datasets.push({
+                                    label: method,
+                                    data: methodData.map(item => ({
+                                        x: item.grind_size,
+                                        y: item.rating
+                                    })),
+                                    backgroundColor: colors[index % colors.length],
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8
+                                });
+                            });
+                            
+                            const scatterData = {
+                                datasets: datasets
+                            };
+                            
+                            const options = {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Grind Size Setting',
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Rating',
+                                            font: {
+                                                size: 12
+                                            }
+                                        },
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Grind Size vs. Rating',
+                                        font: {
+                                            size: 16
+                                        }
+                                    }
+                                }
+                            };
+                            
+                            currentChart = new Chart(ctx, {
+                                type: 'scatter',
+                                data: scatterData,
+                                options: options
+                            });
+                            
+                            // Generate insights
+                            let insightsHtml = '<p>Each point represents a coffee log with its grind size and rating.</p>';
+                            insightsHtml += '<p class="mt-1">Look for clusters of high-rated coffees to find your ideal grind size for each method.</p>';
+                            
+                            document.getElementById('chartInsights').innerHTML = insightsHtml;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching grind analysis data:', error);
+                            document.getElementById('chartInsights').innerHTML = '<p>Error loading grind analysis data.</p>';
+                        });
+                    
+                    // Placeholder insight while loading
+                    insights = '<p>Loading grind size analysis...</p>';
+                }
+                
+                // Update insights
+                if (insights) {
+                    document.getElementById('chartInsights').innerHTML = insights;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

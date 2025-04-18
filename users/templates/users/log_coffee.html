@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Coffee</title>
+  {% load static %}
+  <link href="{% static 'output.css' %}" rel="stylesheet">
+  {% load crispy_forms_tags %}
+</head>
+
+<body class="bg-cream min-h-screen py-5 font-sans">
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8 border border-latte/30">
+       <div class="flex justify-between items-center mb-6">
+           <h2 class="text-2xl md:text-3xl font-semibold text-coffee-bean">Log a New Coffee Entry</h2>
+           {# Updated logo path and size #}
+           <img src="{% static 'assets/images/small_logo.png' %}" alt="CoffeeConnect Logo" class="h-16"> {# Changed h-10 to h-16 #}
+       </div>
+      {% if messages %}
+        <div class="mb-4">
+          {% for message in messages %}
+            <div class="p-4 rounded {% if message.tags == 'success' %} bg-accent-green/80 text-white {% elif message.tags == 'error' %} bg-red-500/80 text-white {% else %} bg-blue-500/80 text-white {% endif %}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit"
+          class="w-full mt-6 py-2 px-4 bg-espresso text-white rounded-md hover:bg-coffee-bean focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-espresso transition duration-150 ease-in-out font-medium">
+          Log Coffee
+        </button>
+      </form>
+      <div class="text-center mt-6">
+        <a href="{% url 'dashboard' %}" class="text-latte hover:text-espresso font-medium">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
